@@ -6,11 +6,10 @@ import shutil
 import sys
 
 def main():
-    basepath = sys.argv[0] if sys.argv[0] != "" else "/"
+    basepath = sys.argv[1] if sys.argv[1] != "" else "/"
     src= "static"
     dst = "docs"
-    # if not os.path.exists(src) or not os.path.exists(dst):
-    #     raise Exception("paths are invalid")
+
     if os.path.exists(dst):
         shutil.rmtree(dst)
     os.mkdir(dst)
@@ -18,7 +17,6 @@ def main():
     copy_files(src, dst)
     dir_path_content = "content"
 
-    # generate_page("content/index.md", "template.html", "public/index.html")
     generate_pages_recursive(dir_path_content, "template.html", dst, basepath)
 
 def copy_files(src, dst):
@@ -60,7 +58,6 @@ def generate_page(from_path, template_path, dest_path, basepath):
     with open(full_dest_path, "w") as f:
         f.write(template)
 
-# generate_pages_recursive("content", template.html, public)
 def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     if os.path.isfile(dir_path_content):
         return generate_page(dir_path_content, template_path, dest_dir_path, basepath)
