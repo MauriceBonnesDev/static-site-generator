@@ -6,18 +6,20 @@ import shutil
 import sys
 
 def main():
-    basepath = sys.argv[1] if sys.argv[1] != "" else "/"
-    src= "static"
-    dst = "docs"
+    basepath = "/"
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    src= "./static"
+    dst = "./docs"
 
     if os.path.exists(dst):
         shutil.rmtree(dst)
     os.mkdir(dst)
 
     copy_files(src, dst)
-    dir_path_content = "content"
+    dir_path_content = "./content"
 
-    generate_pages_recursive(dir_path_content, "template.html", dst, basepath)
+    generate_pages_recursive(dir_path_content, "./template.html", dst, basepath)
 
 def copy_files(src, dst):
     if os.path.isfile(src):
