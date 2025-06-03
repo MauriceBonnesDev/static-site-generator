@@ -1,0 +1,74 @@
+from os.path import isfile
+from markdown_blocks import markdown_to_html_node
+from textnode import TextNode, TextType
+import os
+import shutil
+
+def main():
+    src= "static"
+    dst = "public"
+    if not os.path.exists(src) or not os.path.exists(dst):
+        raise Exception("paths are invalid")
+    shutil.rmtree(dst)
+    os.mkdir(dst)
+
+    copy_files(src, dst)
+
+    # generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
+
+def copy_files(src, dst):
+    if os.path.isfile(src):
+        return shutil.copy(src, dst)
+    
+    for sub_dir in os.listdir(src):
+        path = os.path.join(src, sub_dir)
+        out_dir = dst
+        if not os.path.isfile(path):
+            out_dir = os.path.join(dst, sub_dir)
+            os.mkdir(out_dir)
+        copy_files(path, out_dir)
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+    heading = ""
+    for line in lines:
+        if line.startswith("# "):
+            heading = line[2:].strip()
+    if heading == "":
+        raise Exception("h1 is missing")
+    return heading
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    markdown = ""
+    template = ""
+    with open(from_path, "r") as f:
+        markdown = f.read()
+    with open(template_path, "r") as f:
+        template = f.read()
+    html = markdown_to_html_node(markdown).to_html()
+    title = extract_title(markdown)
+    template = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+
+    full_dest_path = os.path.join(dest_path, "index.html")
+    os.makedirs(dest_path, exist_ok=True)
+    with open(full_dest_path, "w") as f:
+        f.write(template)
+
+# generate_pages_recursive("content", template.html, public)
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if os.path.isfile(dir_path_content):
+        return generate_page(dir_path_content, template_path, dest_dir_path)
+
+    for sub_dir in os.listdir(dir_path_content):
+        path = os.path.join(dir_path_content, sub_dir)
+        out_dir = dest_dir_path
+        if not os.path.isfile(path):
+            out_dir = os.path.join(dest_dir_path, sub_dir)
+            os.mkdir(out_dir)
+        print(f"Recursively calling generate_pages_recursive with {path} at {out_dir} using {template_path}")
+        generate_pages_recursive(path, template_path, out_dir)
+
+
+main()
